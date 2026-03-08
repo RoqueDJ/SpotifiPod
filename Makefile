@@ -1,4 +1,5 @@
 # SpotifiPod Nintendo DS Makefile
+# Works with devkitPro installed via GitHub Actions workflow
 
 TARGET      := SpotifiPod
 SOURCES     := source
@@ -7,8 +8,9 @@ DATA        := data
 # Use libnds for Nintendo DS development
 LIBS        := -lnds
 
-# DevkitPro environment variables (already set in container)
+# DevkitPro environment variables
 DEVKITPRO   ?= /opt/devkitpro
+DEVKITARM   ?= $(DEVKITPRO)/devkitARM
 
 # Include DS rules from libnds
 include $(DEVKITPRO)/libnds/devkitARM/ds_rules
@@ -17,10 +19,10 @@ include $(DEVKITPRO)/libnds/devkitARM/ds_rules
 CFILES      := $(wildcard $(SOURCES)/*.c)
 OFILES      := $(CFILES:.c=.o)
 
-# Default target
+# Default target: build ROM
 all: $(TARGET).nds
 
-# Build the .nds ROM
+# Compile the .nds ROM
 $(TARGET).nds: $(OFILES)
 	$(CC) $(OFILES) -o $(TARGET).elf $(LDFLAGS)
 	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).nds
