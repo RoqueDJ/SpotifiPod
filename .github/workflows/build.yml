@@ -1,0 +1,31 @@
+name: Build Nintendo DS ROM
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install devkitPro
+        run: |
+          sudo apt update
+          sudo apt install -y wget
+          wget https://apt.devkitpro.org/install-devkitpro-pacman
+          sudo bash install-devkitpro-pacman
+          sudo dkp-pacman -Syu --noconfirm
+          sudo dkp-pacman -S --noconfirm devkitARM libnds
+
+      - name: Build project
+        run: make
+
+      - name: Upload .nds file
+        uses: actions/upload-artifact@v3
+        with:
+          name: SpotifiPod
+          path: "*.nds"
