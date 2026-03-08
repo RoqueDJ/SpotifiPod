@@ -13,30 +13,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Install dependencies: devkitPro, devkitARM, libnds
-      - name: Install devkitPro toolchains
+      # 2️⃣ Install devkitPro using official method (curl pipe)
+      - name: Install devkitPro pacman (Official)
         run: |
-          sudo apt update
-          sudo apt install -y wget git unzip curl
-          
-          # Download the official installer
-          wget https://apt.devkitpro.org/install-devkitpro-pacman
-          chmod +x install-devkitpro-pacman
-          sudo ./install-devkitpro-pacman -y
-          
-          # Install devkitARM + libnds
+          sudo apt-get update
+          sudo apt-get install -y curl git unzip
+          curl -L https://apt.devkitpro.org/install-devkitpro-pacman | sudo bash
+
+      # 3️⃣ Install devkitARM + libnds
+      - name: Install devkitARM and libnds
+        run: |
           sudo dkp-pacman -Syu --noconfirm
           sudo dkp-pacman -S --noconfirm devkitARM libnds
 
-          # Set environment variables
+      # 4️⃣ Set environment variables for devkitPro tools
+      - name: Set environment variables
+        run: |
           echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
           echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
 
-      # 3️⃣ Build your ROM
+      # 5️⃣ Build the ROM
       - name: Build SpotifiPod
         run: make
 
-      # 4️⃣ Upload the compiled ROM as artifact
+      # 6️⃣ Upload the compiled ROM
       - name: Upload ROM
         uses: actions/upload-artifact@v4
         with:
