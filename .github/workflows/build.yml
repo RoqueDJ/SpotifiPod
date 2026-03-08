@@ -1,4 +1,4 @@
-name: Build Nintendo DS ROM
+name: Build SpotifiPod Nintendo DS ROM
 
 on:
   push:
@@ -8,30 +8,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Use the official devkitPro container with devkitARM + libnds preinstalled
+    container:
+      image: ghcr.io/devkitpro/devkitarm:latest
+
     steps:
-      - name: Checkout repo
+      # Checkout your repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install devkitPro (via .deb package)
-        run: |
-          sudo apt update
-          sudo apt install -y wget git unzip
-
-          # Download the official devkitPro pacman .deb installer
-          wget https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.amd64.deb
-          sudo dpkg -i devkitpro-pacman.amd64.deb
-
-          # Install devkitARM and libnds
-          sudo dkp-pacman -Syu --noconfirm
-          sudo dkp-pacman -S --noconfirm devkitARM libnds
-
-          # Set environment variables for Makefile
-          echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
-
-      - name: Build project
+      # Build the ROM
+      - name: Build SpotifiPod
         run: make
 
+      # Upload the compiled ROM
       - name: Upload ROM
         uses: actions/upload-artifact@v4
         with:
