@@ -2,25 +2,23 @@
 # SpotifiPod Nintendo DS Makefile
 #---------------------------------------------------------------------------------
 
-TARGET      := SpotifiPod
-BUILD       := build
-SOURCES     := source
-DATA        := data
-INCLUDES    :=
+TARGET	:= SpotifiPod
+BUILD	:= build
+SOURCES	:= source
+INCLUDES:=
 
-LIBS        := -lnds9
-
-#---------------------------------------------------------------------------------
-
-export DEVKITPRO ?= /opt/devkitpro
-export DEVKITARM ?= $(DEVKITPRO)/devkitARM
-
-include $(DEVKITPRO)/libnds/default_arm9_rules
+LIBS	:= -lnds
 
 #---------------------------------------------------------------------------------
 
-CFILES      := $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-OFILES      := $(CFILES:.c=.o)
+DEVKITPRO ?= /opt/devkitpro
+
+include $(DEVKITPRO)/libnds/devkitARM/ds_rules
+
+#---------------------------------------------------------------------------------
+
+CFILES := $(wildcard $(SOURCES)/*.c)
+OFILES := $(CFILES:.c=.o)
 
 #---------------------------------------------------------------------------------
 
@@ -30,8 +28,8 @@ $(TARGET).nds: $(OFILES)
 	$(CC) $(OFILES) -o $(TARGET).elf $(LDFLAGS)
 	$(OBJCOPY) -O binary $(TARGET).elf $(TARGET).nds
 
-%.o: $(SOURCES)/%.c
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o *.elf *.nds
+	rm -f $(OFILES) $(TARGET).elf $(TARGET).nds
