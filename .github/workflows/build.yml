@@ -9,34 +9,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout your repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # 1️⃣ Checkout code
+      - uses: actions/checkout@v4
 
-      # 2️⃣ Install devkitPro using official method (curl pipe)
-      - name: Install devkitPro pacman (Official)
+      # 2️⃣ Install prerequisites
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y wget git unzip
+
+      # 3️⃣ Download devkitPro pacman .deb
+      - name: Download devkitPro pacman
         run: |
-          sudo apt-get update
-          sudo apt-get install -y curl git unzip
-          curl -L https://apt.devkitpro.org/install-devkitpro-pacman | sudo bash
+          wget https://github.com/devkitPro/pacman/releases/download/v1.0.3/devkitpro-pacman.amd64.deb
 
-      # 3️⃣ Install devkitARM + libnds
+      # 4️⃣ Install devkitPro pacman
+      - name: Install devkitPro pacman
+        run: sudo dpkg -i devkitpro-pacman.amd64.deb
+
+      # 5️⃣ Install devkitARM and libnds
       - name: Install devkitARM and libnds
         run: |
           sudo dkp-pacman -Syu --noconfirm
           sudo dkp-pacman -S --noconfirm devkitARM libnds
 
-      # 4️⃣ Set environment variables for devkitPro tools
-      - name: Set environment variables
+      # 6️⃣ Set environment variables
+      - name: Set devkitPro environment
         run: |
           echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
           echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
 
-      # 5️⃣ Build the ROM
+      # 7️⃣ Build the ROM
       - name: Build SpotifiPod
         run: make
 
-      # 6️⃣ Upload the compiled ROM
+      # 8️⃣ Upload ROM artifact
       - name: Upload ROM
         uses: actions/upload-artifact@v4
         with:
