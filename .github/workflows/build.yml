@@ -12,11 +12,23 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up devkitPro
-        uses: devkitpro/setup-devkitpro@v2
-        with:
-          toolchain: devkitARM
-          libraries: libnds
+      - name: Install devkitPro and devkitARM + libnds
+        run: |
+          sudo apt update
+          sudo apt install -y wget git unzip
+
+          # Download and run the official devkitPro installer
+          wget https://apt.devkitpro.org/install-devkitpro-pacman
+          chmod +x install-devkitpro-pacman
+          sudo ./install-devkitpro-pacman
+
+          # Install devkitARM and libnds
+          sudo dkp-pacman -Syu --noconfirm
+          sudo dkp-pacman -S --noconfirm devkitARM libnds
+
+          # Set environment variables for devkitPro
+          echo "export DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
+          echo "export DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
 
       - name: Build project
         run: make
