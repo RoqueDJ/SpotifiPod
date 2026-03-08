@@ -1,49 +1,40 @@
-name: Build SpotifiPod Nintendo DS ROM
+name: Build SpotifiPod
 
 on:
   push:
-  workflow_dispatch:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    container: devkitpro/devkitpro:latest  # Official devkitPro Docker image
     steps:
-      # 1️⃣ Checkout code
-      - uses: actions/checkout@v4
+      # Step 1: Checkout the repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # 2️⃣ Install prerequisites
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y wget git unzip
-
-      # 3️⃣ Download devkitPro pacman .deb
-      - name: Download devkitPro pacman
-        run: |
-          wget https://github.com/devkitPro/pacman/releases/download/v1.0.3/devkitpro-pacman.amd64.deb
-
-      # 4️⃣ Install devkitPro pacman
-      - name: Install devkitPro pacman
-        run: sudo dpkg -i devkitpro-pacman.amd64.deb
-
-      # 5️⃣ Install devkitARM and libnds
-      - name: Install devkitARM and libnds
-        run: |
-          sudo dkp-pacman -Syu --noconfirm
-          sudo dkp-pacman -S --noconfirm devkitARM libnds
-
-      # 6️⃣ Set environment variables
+      # Step 2: Set up environment variables (optional)
       - name: Set devkitPro environment
         run: |
-          echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-          echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
+          echo "export DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
+          echo "export DEVKITARM=$DEVKITPRO/devkitARM" >> $GITHUB_ENV
+          echo "export PATH=$DEVKITPRO/tools/bin:$PATH" >> $GITHUB_ENV
 
-      # 7️⃣ Build the ROM
+      # Step 3: Install any dependencies your project needs
+      - name: Install additional dependencies
+        run: sudo apt-get update && sudo apt-get install -y git wget unzip
+
+      # Step 4: Build your project
       - name: Build SpotifiPod
-        run: make
+        run: |
+          cd SpotifiPod
+          make all  # Or whatever build command your project uses
 
-      # 8️⃣ Upload ROM artifact
-      - name: Upload ROM
+      # Step 5: Upload build artifacts (optional)
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SpotifiPod
-          path: SpotifiPod.nds
+          name: SpotifiPod-build
+          path: SpotifiPod/build/  # Adjust to your actual build folder
