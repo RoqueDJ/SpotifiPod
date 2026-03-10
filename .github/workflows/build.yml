@@ -1,4 +1,4 @@
-name: Build SpotifiPod
+name: Build devkitPro Project
 
 on:
   push:
@@ -9,32 +9,27 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: devkitpro/devkitpro:latest  # Official devkitPro Docker image
+    container:
+      image: ghcr.io/devkitpro/devkitpro-linux:latest
+
     steps:
-      # Step 1: Checkout the repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Set up environment variables (optional)
-      - name: Set devkitPro environment
+      - name: Update devkitPro pacman and install toolchains
         run: |
-          echo "export DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-          echo "export DEVKITARM=$DEVKITPRO/devkitARM" >> $GITHUB_ENV
-          echo "export PATH=$DEVKITPRO/tools/bin:$PATH" >> $GITHUB_ENV
+          sudo dkp-pacman -Syu --noconfirm
+          sudo dkp-pacman -S --noconfirm devkitARM libnds
 
-      # Step 3: Install any dependencies your project needs
-      - name: Install additional dependencies
-        run: sudo apt-get update && sudo apt-get install -y git wget unzip
-
-      # Step 4: Build your project
-      - name: Build SpotifiPod
+      - name: Build project
         run: |
-          cd SpotifiPod
-          make all  # Or whatever build command your project uses
+          # Replace with your actual build commands
+          make all
 
-      # Step 5: Upload build artifacts (optional)
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SpotifiPod-build
-          path: SpotifiPod/build/  # Adjust to your actual build folder
+          name: build-output
+          path: |
+            ./build
+            ./bin
