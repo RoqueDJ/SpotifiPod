@@ -1,35 +1,43 @@
-name: Build devkitPro Project
+name: Build SpotifiPod
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/devkitpro/devkitpro-linux:latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Update devkitPro pacman and install toolchains
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget git build-essential
+
+      - name: Install devkitPro
+        run: |
+          wget https://apt.devkitpro.org/install-devkitpro-pacman
+          chmod +x install-devkitpro-pacman
+          sudo ./install-devkitpro-pacman
+
+      - name: Install devkitARM and libnds
         run: |
           sudo dkp-pacman -Syu --noconfirm
           sudo dkp-pacman -S --noconfirm devkitARM libnds
 
       - name: Build project
         run: |
-          # Replace with your actual build commands
-          make all
+          make
 
-      - name: Upload build artifacts
+      - name: Upload build
         uses: actions/upload-artifact@v4
         with:
-          name: build-output
+          name: build
           path: |
-            ./build
-            ./bin
+            *.nds
+            *.elf
+            build/
